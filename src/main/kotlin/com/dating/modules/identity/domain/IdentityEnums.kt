@@ -24,3 +24,10 @@ enum class AgreementType {
     MARKETING,
     NIGHT_MARKETING,
 }
+
+enum class PasetoKeyStatus {
+    ACTIVE,
+    VERIFY_ONLY,
+    RETIRED,
+    COMPROMISED,
+}

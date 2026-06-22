@@ -10,7 +10,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
-class CurrentUserArgumentResolver : HandlerMethodArgumentResolver {
+class CurrentUserArgumentResolver(
+    private val pasetoTokenService: PasetoTokenService,
+) : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.hasParameterAnnotation(CurrentUser::class.java) &&
@@ -23,10 +25,22 @@ class CurrentUserArgumentResolver : HandlerMethodArgumentResolver {
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?,
     ): Any {
-        val header = webRequest.getHeader("X-User-Id")
-            ?: throw DatingException(ErrorCode.UNAUTHENTICATED, "X-User-Id header is required until token auth is wired.")
+        val header = webRequest.getHeader("Authorization")
+            ?: throw DatingException(ErrorCode.UNAUTHENTICATED, "Authorization header is required.")
 
-        return header.toLongOrNull()
-            ?: throw DatingException(ErrorCode.UNAUTHENTICATED, "X-User-Id must be a numeric user id.")
+        if (!header.startsWith(BEARER_PREFIX, ignoreCase = true)) {
+            throw DatingException(ErrorCode.UNAUTHENTICATED, "Authorization must use Bearer token.")
+        }
+
+        val token = header.substring(BEARER_PREFIX.length).trim()
+        if (token.isBlank()) {
+            throw DatingException(ErrorCode.UNAUTHENTICATED, "Bearer token is empty.")
+        }
+
+        return pasetoTokenService.authenticateAccessToken(token).userId
+    }
+
+    private companion object {
+        const val BEARER_PREFIX = "Bearer "
     }
 }

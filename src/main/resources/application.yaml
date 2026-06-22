@@ -17,6 +17,19 @@ spring:
   jooq:
     sql-dialect: postgres
 
+dating:
+  auth:
+    issuer: dating-api
+    access-token-ttl: 15m
+    refresh-token-ttl: 30d
+    max-active-sessions: 5
+    refresh-token-pepper: ${REFRESH_TOKEN_PEPPER:local-dev-refresh-pepper-change-me}
+    paseto:
+      key-id: ${PASETO_KEY_ID:local-dev-key}
+      private-key-base64: ${PASETO_PRIVATE_KEY_BASE64:}
+      public-key-base64: ${PASETO_PUBLIC_KEY_BASE64:}
+      allow-dev-generated-key: ${PASETO_ALLOW_DEV_GENERATED_KEY:true}
+
 server:
   error:
     whitelabel:
